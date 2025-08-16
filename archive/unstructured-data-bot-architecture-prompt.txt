@@ -1,0 +1,35 @@
+I want to create an application that structures unstructured data from a large cloud repository (like Box.com, or SharePoint online) on a per customer basis. The purpose of the overall application will allow the user to ask a wide range of questions about a 'lake' of unstructured data and provide the interface that will provide artificial structure to the data, fetch relevant files with pre-configured summary data and get answers from the AI that are meaningful and specific
+
+Characteristics of a successful application would include:
+
+- The ability to traverse wide and deep directory structures
+- take note of files and directories that have already been processed
+- identify changes to files or directories that have been processed then re-process changed (and only changed) files and update directory structures where required
+- identify new files or directories when they are created (or on some scheduled scanning basis)
+- Create a database (tentatively in mongodb) that will serve as the index for the unstructured data
+- Create one row per file with each column containing descriptors for the files content that can easily be searched (for example, file path; fileID; fileName; fileModifyDate;FileAuthor;etc.)
+- dynamically add new columns when a new file feature that is germane to the purpose of the application is discovered. 
+- Dynamically populate each column of the database with relevant information particular to the row in question
+- Dynamically annotate each column of the database as it is added to describe its purpose (e.g. sensisitive-data-type-PII <this column contains the flag (yes/no) for whether or not sensitive data related to PII has been found in this particular file>)
+- a python pre-filter that will analyze each file in the directory tree and identify certain types of files that will be indexed and annotated and characterized in the database index but will not require further analysis by the AI (.mp3, .mp4, images, cad drawings, etc.) while flagging others for AI processing. This python program will leverage the cloud storage API for all of the information that the cloud storage service knows about the files in question
+-prompt for the code from the cloud service provider to instantiate an MCP server specficic to that cloud provider
+-Assume this resulting program will be implemented in AzureAI and leverage various LLM models
+-Assume the master controlling program will be containerized on a Linux machine with the MondgoDB server in its own container
+-Assume that you will need to create a database backup script that will use immutable Azure storage blobs as destinations for mongodb backups and that backups will happen every 4 business hours where database activity has been observed.
+- Dynamically develop an AI processing prompt and action that will:
+--identify those files flagged for AI processing
+--ask the user for a representative set of directories to process to optimize the prompt, share the output with the user and proactively suggest a prompt that will accurately characterize the content of the files in the directory.
+--ask the user for various types of information to be analyzed as it builds the prompt (e.g. legal documents, financial statements, various types of sensitive data, work product, proposals, contracts, etc.).|
+--based on these inputs leverage a continuous self-improvement process to optimize the prompt for efficiency and effectiveness
+---optimize the prompt for cost given the user input of cost per query
+---leverage the pre-filter information already gathered and stored in the database from the python pre-processor to estimate budget for analyzing the remaining files
+-Dynamically create a master index of the unstructured data repo that can be used as RAG input for general queries
+-Create an interface for user queries via a Microsoft Teams agent that will allow the user to enter questions against the unstructured data. 
+--record the questions submitted over Microsoft Teams chat
+--run an AI query to optimize the question to be most effective against what you know about the contenxt of the question from the master index
+--Compile an actual query against the unstructured data by leveraging both the master index and the entire mongodb database to produce a list of files that are germane to the query
+--Use the AI query to evaluate the question and response using the specific files returned in from the prompt in the previous step to return an answer to the users question over the Teams chat channel already established
+-given the characteristics above, suggest other features and functions that should be added
+
+
+Given the objective and characteristics of the application above, generate a detailed software specification for this application   

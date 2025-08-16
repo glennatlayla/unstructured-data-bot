@@ -1,0 +1,141 @@
+version: '3.8'
+services:
+  mongodb:
+    image: mongo:7.0
+    ports:
+      - '27017:27017'
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+    volumes:
+      - ./data/mongodb:/data/db
+  azurite:
+    image: mcr.microsoft.com/azure-storage/azurite
+    ports:
+      - '10000:10000'
+      - '10001:10001'
+      - '10002:10002'
+    volumes:
+      - ./data/blob-storage:/data
+  redis:
+    image: redis:7-alpine
+    ports:
+      - '6379:6379'
+  orchestrator:
+    build:
+      context: .
+      dockerfile: ./docker/orchestrator/Dockerfile
+    ports:
+      - '8080:8080'
+    environment:
+      - MONGODB_URL=mongodb://admin:password@mongodb:27017/unstructured_data?authSource=admin
+      - REDIS_URL=redis://redis:6379
+      - AZURE_OPENAI_ENDPOINT=${AZURE_OPENAI_ENDPOINT:-}
+      - AZURE_OPENAI_KEY=${AZURE_OPENAI_KEY:-}
+      - AZURE_AI_SEARCH_ENDPOINT=${AZURE_AI_SEARCH_ENDPOINT:-}
+      - AZURE_AI_SEARCH_KEY=${AZURE_AI_SEARCH_KEY:-}
+    depends_on:
+      - mongodb
+      - redis
+      - authz
+  authz:
+    build:
+      context: .
+      dockerfile: ./docker/authz/Dockerfile
+    ports:
+      - '8083:8083'
+    environment:
+      - MONGODB_URL=mongodb://admin:password@mongodb:27017/unstructured_data?authSource=admin
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - mongodb
+      - redis
+  ingestion:
+    build:
+      context: .
+      dockerfile: ./docker/ingestion/Dockerfile
+    ports:
+      - '8081:8081'
+    environment:
+      - MONGODB_URL=mongodb://admin:password@mongodb:27017/unstructured_data?authSource=admin
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - mongodb
+      - redis
+      - mcp-box-server
+      - mcp-files-server
+  prefilter:
+    build:
+      context: .
+      dockerfile: ./docker/prefilter/Dockerfile
+    ports:
+      - '8084:8084'
+    environment:
+      - MONGODB_URL=mongodb://admin:password@mongodb:27017/unstructured_data?authSource=admin
+    depends_on:
+      - mongodb
+  ai-pipeline:
+    build:
+      context: .
+      dockerfile: ./docker/ai-pipeline/Dockerfile
+    ports:
+      - '8085:8085'
+    environment:
+      - MONGODB_URL=mongodb://admin:password@mongodb:27017/unstructured_data?authSource=admin
+      - AZURE_OPENAI_ENDPOINT=${AZURE_OPENAI_ENDPOINT:-}
+      - AZURE_OPENAI_KEY=${AZURE_OPENAI_KEY:-}
+      - AZURE_AI_SEARCH_ENDPOINT=${AZURE_AI_SEARCH_ENDPOINT:-}
+      - AZURE_AI_SEARCH_KEY=${AZURE_AI_SEARCH_KEY:-}
+    depends_on:
+      - mongodb
+  bot:
+    build:
+      context: .
+      dockerfile: ./docker/bot/Dockerfile
+    ports:
+      - '3978:3978'
+    environment:
+      - MONGODB_URL=mongodb://admin:password@mongodb:27017/unstructured_data?authSource=admin
+      - MICROSOFT_APP_ID=${MICROSOFT_APP_ID:-}
+      - MICROSOFT_APP_PASSWORD=${MICROSOFT_APP_PASSWORD:-}
+      - ORCHESTRATOR_URL=http://orchestrator:8080
+    depends_on:
+      - orchestrator
+  admin-ui:
+    build:
+      context: .
+      dockerfile: ./docker/admin-ui/Dockerfile
+    ports:
+      - '3000:3000'
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8080
+    depends_on:
+      - orchestrator
+  cost:
+    build:
+      context: .
+      dockerfile: ./docker/cost/Dockerfile
+    ports:
+      - '8082:8082'
+    environment:
+      - MONGODB_URL=mongodb://admin:password@mongodb:27017/unstructured_data?authSource=admin
+    depends_on:
+      - mongodb
+  mcp-box-server:
+    build:
+      context: .
+      dockerfile: ./docker/mcp-box-server/Dockerfile
+    ports:
+      - '8086:8086'
+    environment:
+      - BOX_CLIENT_ID=${BOX_CLIENT_ID:-}
+      - BOX_CLIENT_SECRET=${BOX_CLIENT_SECRET:-}
+  mcp-files-server:
+    build:
+      context: .
+      dockerfile: ./docker/mcp-files-server/Dockerfile
+    ports:
+      - '8087:8087'
+    environment:
+      - MICROSOFT_CLIENT_ID=${MICROSOFT_CLIENT_ID:-}
+      - MICROSOFT_CLIENT_SECRET=${MICROSOFT_CLIENT_SECRET:-}

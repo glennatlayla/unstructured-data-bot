@@ -1,0 +1,159 @@
+{
+  "models": [
+    {
+      "deployment_name": "gpt-4o",
+      "endpoint": "AZURE_OPENAI_ENDPOINT",
+      "api_version": "2024-05-13",
+      "capabilities": ["chat", "vision", "tools", "function_calling"],
+      "performance_metrics": {
+        "latency": "low",
+        "quality": "high",
+        "context_length": 128000
+      },
+      "tags": ["gpt-4", "vision", "tools", "high-quality"],
+      "health_status": "healthy",
+      "rate_limits": {
+        "requests_per_minute": 3000,
+        "tokens_per_minute": 150000
+      },
+      "cost_per_token": {
+        "input": 0.000005,
+        "output": 0.000015
+      }
+    },
+    {
+      "deployment_name": "gpt-4o-mini",
+      "endpoint": "AZURE_OPENAI_ENDPOINT",
+      "api_version": "2024-05-13",
+      "capabilities": ["chat", "vision", "tools", "function_calling"],
+      "performance_metrics": {
+        "latency": "low",
+        "quality": "medium",
+        "context_length": 128000
+      },
+      "tags": ["gpt-4", "vision", "tools", "cost-effective"],
+      "health_status": "healthy",
+      "rate_limits": {
+        "requests_per_minute": 3000,
+        "tokens_per_minute": 150000
+      },
+      "cost_per_token": {
+        "input": 0.00000015,
+        "output": 0.0000006
+      }
+    },
+    {
+      "deployment_name": "gpt-35-turbo",
+      "endpoint": "AZURE_OPENAI_ENDPOINT",
+      "api_version": "0613",
+      "capabilities": ["chat"],
+      "performance_metrics": {
+        "latency": "very_low",
+        "quality": "medium",
+        "context_length": 16385
+      },
+      "tags": ["gpt-35", "fast", "cost-effective"],
+      "health_status": "healthy",
+      "rate_limits": {
+        "requests_per_minute": 3000,
+        "tokens_per_minute": 150000
+      },
+      "cost_per_token": {
+        "input": 0.0000015,
+        "output": 0.000002
+      }
+    },
+    {
+      "deployment_name": "text-embedding-3-large",
+      "endpoint": "AZURE_OPENAI_ENDPOINT",
+      "api_version": "2024-05-13",
+      "capabilities": ["embeddings"],
+      "performance_metrics": {
+        "latency": "low",
+        "quality": "high",
+        "context_length": 8192
+      },
+      "tags": ["embedding", "high-quality"],
+      "health_status": "healthy",
+      "rate_limits": {
+        "requests_per_minute": 3000,
+        "tokens_per_minute": 150000
+      },
+      "cost_per_token": {
+        "input": 0.00000013,
+        "output": 0.0
+      }
+    }
+  ],
+  "routing_policies": [
+    {
+      "tenant_id": "default",
+      "feature": "qa",
+      "model_selection_rules": {
+        "primary": "gpt-4o",
+        "fallback": "gpt-4o-mini",
+        "budget_fallback": "gpt-35-turbo"
+      },
+      "budget_constraints": {
+        "monthly_budget": 1000.0,
+        "cost_threshold": 0.8,
+        "automatic_downshift": true
+      },
+      "feature_flags": {
+        "a_b_testing": false,
+        "quality_priority": true
+      }
+    },
+    {
+      "tenant_id": "default",
+      "feature": "summarize",
+      "model_selection_rules": {
+        "primary": "gpt-4o-mini",
+        "fallback": "gpt-35-turbo"
+      },
+      "budget_constraints": {
+        "monthly_budget": 500.0,
+        "cost_threshold": 0.9,
+        "automatic_downshift": true
+      },
+      "feature_flags": {
+        "a_b_testing": false,
+        "quality_priority": false
+      }
+    },
+    {
+      "tenant_id": "default",
+      "feature": "embed",
+      "model_selection_rules": {
+        "primary": "text-embedding-3-large"
+      },
+      "budget_constraints": {
+        "monthly_budget": 200.0,
+        "cost_threshold": 0.95,
+        "automatic_downshift": false
+      },
+      "feature_flags": {
+        "a_b_testing": false,
+        "quality_priority": true
+      }
+    },
+    {
+      "tenant_id": "default",
+      "feature": "chat",
+      "model_selection_rules": {
+        "primary": "gpt-4o",
+        "fallback": "gpt-4o-mini",
+        "budget_fallback": "gpt-35-turbo"
+      },
+      "budget_constraints": {
+        "monthly_budget": 800.0,
+        "cost_threshold": 0.85,
+        "automatic_downshift": true
+      },
+      "feature_flags": {
+        "a_b_testing": true,
+        "quality_priority": true
+      }
+    }
+  ]
+}
