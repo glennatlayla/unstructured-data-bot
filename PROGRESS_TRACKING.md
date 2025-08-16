@@ -2,11 +2,11 @@
 
 ## Project Progress Overview
 
-**Total Steps:** 13  \n**Current Step:** 7  \n**Progress:** 6/13 (46.2%)  \n**Status:** IN PROGRESS
+**Total Steps:** 14  \n**Current Step:** 7  \n**Progress:** 6/14 (42.9%)  \n**Status:** IN PROGRESS
 
 ## Current Status: Step 7 - AI Pipeline Service
 
-**Last Updated:** 2025-01-27 21:45:00 UTC  \n**Current Step:** 7 of 13  \n**Completed Steps:** 1, 2, 3, 4, 5, 6  \n\n## Step Completion History
+**Last Updated:** 2025-08-16 10:30:00 UTC  \n**Current Step:** 7 of 14  \n**Completed Steps:** 1, 2, 3, 4, 5, 6  \n\n## Step Completion History
 
 ### ✅ Step 1: Repository Structure & Infrastructure Setup
 - **Status:** COMPLETED
@@ -61,19 +61,20 @@
 
 ### ✅ Step 6: MCP Connectors Implementation
 - **Status:** COMPLETED
-- **Date:** 2025-01-27
-- **Details:** Complete MCP protocol servers for Box and Microsoft 365 integration with FastAPI wrappers
+- **Date:** 2025-08-16
+- **Details:** Complete MCP protocol servers for Box and Microsoft 365 integration with FastAPI wrappers and health endpoints
 - **Files Created/Updated:**
-  - `services/mcp-connectors/box-server/app/server.py` - Complete MCP Box server with FastAPI wrapper
-  - `services/mcp-connectors/files-server/app/server.py` - Complete MCP Microsoft Files server with FastAPI wrapper
+  - `services/mcp-connectors/box-server/app/server.py` - Complete MCP Box server with FastAPI wrapper and health endpoint
+  - `services/mcp-connectors/files-server/app/server.py` - Complete MCP Microsoft Files server with FastAPI wrapper and health endpoint
   - `services/mcp-connectors/box-server/requirements.txt` - Updated with mcp==1.12.4 and compatible dependencies
   - `services/mcp-connectors/files-server/requirements.txt` - Updated with mcp==1.12.4 and compatible dependencies
   - `docker/mcp-box-server/Dockerfile` - Fixed to run server.py directly
   - `docker/mcp-files-server/Dockerfile` - Fixed to run server.py directly
-  - `docker/ingestion/Dockerfile` - Fixed to copy from correct paths
-  - `docker/orchestrator/Dockerfile` - Fixed to copy from correct paths
-  - `docker/ingestion/requirements.txt` - Removed invalid hashlib-compat dependency, updated versions
-  - `docker/orchestrator/requirements.txt` - Updated to use compatible dependency versions
+  - **FIXES APPLIED:**
+    - Fixed uvicorn startup command from `"app.server:server"` to `app` (FastAPI instance)
+    - Added FastAPI health check endpoints (`/healthz`) to both servers
+    - Resolved ModuleNotFoundError by using correct FastAPI app instance
+    - Both servers now start successfully and respond to health checks
 
 ## Current Work: Step 7 - AI Pipeline Service
 

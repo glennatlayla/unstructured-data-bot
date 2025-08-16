@@ -7,6 +7,7 @@ import os
 import json
 from typing import Dict, List, Any
 from fastapi import FastAPI
+import uvicorn
 
 server = Server("microsoft-files-mcp-server")
 
@@ -16,6 +17,11 @@ app = FastAPI()
 @app.get("/healthz")
 async def health_check():
     return {"status": "healthy", "service": "microsoft-files-mcp-server"}
+
+@app.get("/tools")
+async def list_tools_endpoint():
+    tools = await list_tools()
+    return {"tools": [tool.dict() for tool in tools]}
 
 @server.list_tools()
 async def list_tools() -> List[Tool]:

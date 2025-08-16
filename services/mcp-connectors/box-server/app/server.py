@@ -6,6 +6,7 @@ import os
 import json
 from typing import Dict, List, Any
 from fastapi import FastAPI
+import uvicorn
 
 # Initialize Box client
 client_id = os.getenv("BOX_CLIENT_ID")
@@ -19,6 +20,11 @@ app = FastAPI()
 @app.get("/healthz")
 async def health_check():
     return {"status": "healthy", "service": "box-mcp-server"}
+
+@app.get("/tools")
+async def list_tools_endpoint():
+    tools = await list_tools()
+    return {"tools": [tool.dict() for tool in tools]}
 
 @server.list_tools()
 async def list_tools() -> List[Tool]:
