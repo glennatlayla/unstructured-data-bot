@@ -6,17 +6,19 @@ import os
 import json
 from typing import Dict, List, Any
 from fastapi import FastAPI
-from fastapi.responses import JSONResponse
 
 # Initialize Box client
 client_id = os.getenv("BOX_CLIENT_ID")
 client_secret = os.getenv("BOX_CLIENT_SECRET")
 
-# Create FastAPI app
-app = FastAPI(title="Box MCP Server", version="1.0.0")
-
-# Create MCP server
 server = Server("box-mcp-server")
+
+# Create FastAPI app for health checks
+app = FastAPI()
+
+@app.get("/healthz")
+async def health_check():
+    return {"status": "healthy", "service": "box-mcp-server"}
 
 @server.list_tools()
 async def list_tools() -> List[Tool]:
@@ -168,21 +170,6 @@ async def get_collaborations(item_id: str, item_type: str, access_token: str) ->
         })
     
     return [TextContent(type="text", text=json.dumps(result, indent=2))]
-
-# FastAPI endpoints
-@app.get("/healthz")
-async def health_check():
-    return JSONResponse(content={"status": "ok", "service": "mcp-box-server", "version": "1.0.0"}, status_code=200)
-
-@app.get("/")
-async def root():
-    return {"message": "Box MCP Server"}
-
-@app.get("/tools")
-async def list_tools_endpoint():
-    """List available tools from Box MCP server"""
-    tools = await list_tools()
-    return tools
 
 if __name__ == "__main__":
     import uvicorn

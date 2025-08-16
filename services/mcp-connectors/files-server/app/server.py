@@ -7,13 +7,15 @@ import os
 import json
 from typing import Dict, List, Any
 from fastapi import FastAPI
-from fastapi.responses import JSONResponse
 
-# Create FastAPI app
-app = FastAPI(title="Microsoft Files MCP Server", version="1.0.0")
-
-# Create MCP server
 server = Server("microsoft-files-mcp-server")
+
+# Create FastAPI app for health checks
+app = FastAPI()
+
+@app.get("/healthz")
+async def health_check():
+    return {"status": "healthy", "service": "microsoft-files-mcp-server"}
 
 @server.list_tools()
 async def list_tools() -> List[Tool]:
@@ -131,21 +133,6 @@ async def get_permissions(drive_id: str, item_id: str, access_token: str) -> Lis
     response.raise_for_status()
     
     return [TextContent(type="text", text=json.dumps(response.json(), indent=2))]
-
-# FastAPI endpoints
-@app.get("/healthz")
-async def health_check():
-    return JSONResponse(content={"status": "ok", "service": "mcp-files-server", "version": "1.0.0"}, status_code=200)
-
-@app.get("/")
-async def root():
-    return {"message": "Microsoft Files MCP Server"}
-
-@app.get("/tools")
-async def list_tools_endpoint():
-    """List available tools from Microsoft Files MCP server"""
-    tools = await list_tools()
-    return tools
 
 if __name__ == "__main__":
     import uvicorn
